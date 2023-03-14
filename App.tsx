@@ -1,18 +1,14 @@
 import React from "react";
-import {
-  Text,
-  Link,
-  HStack,
-  Center,
-  Heading,
-  Switch,
-  useColorMode,
-  NativeBaseProvider,
-  extendTheme,
-  VStack,
-  Box,
-} from "native-base";
-import NativeBaseIcon from "./components/NativeBaseIcon";
+import { NativeBaseProvider, extendTheme } from "native-base";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { NavigationContainer } from "@react-navigation/native";
+import IndexNavigation from "./src/navigations/IndexNavigation";
+import { AppProvider } from "./src/contexts/AppContext";
+import { MaterialIcons } from "@expo/vector-icons";
+import Toast from 'react-native-toast-notifications';
+import AppContext from './src/contexts/AppContext';
+import client from "./src/config/client.config";
+
 
 // Define the config
 const config = {
@@ -26,62 +22,55 @@ type MyThemeType = typeof theme;
 declare module "native-base" {
   interface ICustomTheme extends MyThemeType {}
 }
-export default function App() {
-  return (
-    <NativeBaseProvider>
-      <Center
-        _dark={{ bg: "blueGray.900" }}
-        _light={{ bg: "blueGray.50" }}
-        px={4}
-        flex={1}
-      >
-        <VStack space={5} alignItems="center">
-          <NativeBaseIcon />
-          <Heading size="lg">Welcome to NativeBase</Heading>
-          <HStack space={2} alignItems="center">
-            <Text>Edit</Text>
-            <Box
-              _web={{
-                _text: {
-                  fontFamily: "monospace",
-                  fontSize: "sm",
-                },
-              }}
-              px={2}
-              py={1}
-              _dark={{ bg: "blueGray.800" }}
-              _light={{ bg: "blueGray.200" }}
-            >
-              App.js
-            </Box>
-            <Text>and save to reload.</Text>
-          </HStack>
-          <Link href="https://docs.nativebase.io" isExternal>
-            <Text color="primary.500" underline fontSize={"xl"}>
-              Learn NativeBase
-            </Text>
-          </Link>
-          <ToggleDarkMode />
-        </VStack>
-      </Center>
-    </NativeBaseProvider>
+export function AppComponent() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnReconnect: true,
+        retry: false,
+        refetchOnMount: true
+      }
+  }});
+  const appContext = React.useContext(AppContext);
+
+  React.useEffect(() => {
+    if(appContext.authData?.token !== undefined && appContext.authData?.token !== null){
+      client.defaults.headers.common['Authorization'] = "Bearer "+appContext.authData?.token;
+    }
+  },[appContext.authData?.token])
+  return ( 
+      <QueryClientProvider client={queryClient} >
+        <NativeBaseProvider>
+            <NavigationContainer>
+               <IndexNavigation />
+            </NavigationContainer>
+        </NativeBaseProvider>
+        <Toast
+            placement="top"
+            dangerIcon={<MaterialIcons size={14} color="white" name="dangerous" />}
+            successIcon={<MaterialIcons size={14} color="white" name="check-circle-outline" />}
+            // @ts-ignore
+            ref={(ref) => global['toast'] = ref } 
+            duration={10000}
+            animationType='slide-in'
+            animationDuration={250}
+            successColor="green"
+            dangerColor="red"
+            warningColor="orange"
+            normalColor="gray"
+            style={{justifyContent:"center",alignItems:"flex-start",paddingHorizontal:15}}
+          />
+      </QueryClientProvider>
+    
   );
 }
 
-// Color Switch Component
-function ToggleDarkMode() {
-  const { colorMode, toggleColorMode } = useColorMode();
-  return (
-    <HStack space={2} alignItems="center">
-      <Text>Dark</Text>
-      <Switch
-        isChecked={colorMode === "light"}
-        onToggle={toggleColorMode}
-        aria-label={
-          colorMode === "light" ? "switch to dark mode" : "switch to light mode"
-        }
-      />
-      <Text>Light</Text>
-    </HStack>
-  );
+export default function App(){
+   return (
+    <AppProvider>
+      <AppComponent />
+    </AppProvider>
+   )
 }
+
+
