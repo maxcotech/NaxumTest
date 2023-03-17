@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "NaxumTest",
-    "slug": "NaxumTest",
+    "name": "NaxumAdmin",
+    "slug": "NaxumAdmin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

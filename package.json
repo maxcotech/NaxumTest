@@ -1,5 +1,5 @@
 {
-  "name": "naxumtest",
+  "name": "naxumadmin",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "keywords": [
@@ -22,6 +22,7 @@
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "axios": "^1.3.4",
+    "dotenv": "^16.0.3",
     "expo": "^44.0.0",
     "expo-secure-store": "~11.1.0",
     "expo-status-bar": "~1.2.0",
@@ -41,6 +42,7 @@
     "@types/react": "~17.0.21",
     "@types/react-native": "~0.64.12",
     "@types/react-query": "^1.2.9",
+    "react-native-dotenv": "^3.4.8",
     "typescript": "~4.3.5"
   },
   "bugs": {

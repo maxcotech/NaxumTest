@@ -32,7 +32,7 @@ export default function Login(){
         }
     })
 
-    return <View flex={1}>
+    return <View flex={1} backgroundColor="white">
         <Center px={"15px"} mx={"auto"} mt={100} w={["100%","70%","40%"]}>
             <Text fontSize="xl" fontWeight={"bold"}>Sign In</Text>
             <Box w="100%">

@@ -1,5 +1,5 @@
 import React from "react";
-import { NativeBaseProvider, extendTheme } from "native-base";
+import { NativeBaseProvider, extendTheme, View } from "native-base";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { NavigationContainer } from "@react-navigation/native";
 import IndexNavigation from "./src/navigations/IndexNavigation";
@@ -51,7 +51,7 @@ export function AppComponent() {
             successIcon={<MaterialIcons size={14} color="white" name="check-circle-outline" />}
             // @ts-ignore
             ref={(ref) => global['toast'] = ref } 
-            duration={10000}
+            duration={3000}
             animationType='slide-in'
             animationDuration={250}
             successColor="green"
@@ -67,9 +67,11 @@ export function AppComponent() {
 
 export default function App(){
    return (
-    <AppProvider>
-      <AppComponent />
-    </AppProvider>
+    
+      <AppProvider>
+        <AppComponent />
+      </AppProvider>
+   
    )
 }
 

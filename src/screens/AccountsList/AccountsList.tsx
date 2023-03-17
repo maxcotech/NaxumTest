@@ -1,18 +1,38 @@
-import { Avatar, Box, Button, Center, CircleIcon, HStack, Input, ScrollView, Spinner, Text, View, VStack } from "native-base";
-import React from "react";
+import { AlertDialog, Avatar, Box, Button, Center, HStack, Input, ScrollView, Spinner, Text, View, VStack } from "native-base";
 import { AccountListParams } from "../../config/data_types/account_types";
 import { useAccounts } from './../../api/queries/account.queries';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { debounced } from "../../helpers/value.helpers";
 import { useNavigation } from '@react-navigation/native';
-import routes from "../../config/routes.config";
+import React, {useRef, useState} from "react"
+import { useLogout } from "./../../api/queries/account.queries";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import routes, {AppParamList} from "../../config/routes.config";
+import AppContext from "../../contexts/AppContext";
+
+
 
 export default function AccountsList(){
     const [params,setParams] = React.useState({} as Partial<AccountListParams>)
-    const {isLoading,data} = useAccounts(params);
-    const navigation = useNavigation();
+    const {data,isRefetching} = useAccounts(params,{keepPreviousData: true});
+    const alertRef = useRef();
+    const [showLogout,setShowLogout] = useState(false);
+    const appContext = React.useContext(AppContext);
+    const navigation = useNavigation<NativeStackNavigationProp<typeof AppParamList>>();
+    const {isLoading,mutate} = useLogout({onSuccess:() => {
+        toast.show('Logout successfully',{type:"success"});
+        setShowLogout(false);
+        appContext.setAuthData(undefined);
+        navigation.replace(routes.login);
+    }})
+    const onLogout = () => {
+        mutate(undefined)
+    }
 
-    return <View flex={1}>
+    return <><View flex={1} backgroundColor="white">
+        <HStack shadow={3} px={"10px"} py={"5px"}>
+            <Button ml="auto" onPress={() => setShowLogout(true)} mr={"10px"} space={1} ><HStack alignItems="center"><MaterialCommunityIcons color="white" name="power" /><Text color="white">Logout</Text></HStack></Button>
+        </HStack>
         <Center borderRadius={15} backgroundColor="white" shadow={4} px={15} mx="auto" mt={50} py={50} w={["100%","60%","60%"]}>
             <HStack py={2} borderBottomWidth={"2px"} borderBottomColor="gray.300" w="100%" alignItems={"center"} justifyContent={"between"} >
                 <Text fontSize="lg" fontWeight={"bold"} >Accounts</Text>
@@ -24,7 +44,7 @@ export default function AccountsList(){
                 <Box flex={1}>
                     <Input size="lg" placeholder={'Search by User Name, Email, Contact Number'} leftElement={<MaterialIcons style={{marginLeft: 10}} size={20} name="search" />}  onChangeText={(val) => debounced(val,(query) => setParams({...params,query}))} />
                 </Box>
-                {(isLoading)? <Spinner size="sm" />:<></>}
+                {(isRefetching)? <Spinner size="sm" />:<></>}
             </HStack>
             <ScrollView mt={30}  w={"100%"}>
                 {
@@ -32,7 +52,7 @@ export default function AccountsList(){
                     <>
                         {
                             data.data.data.map((item) => (
-                                <HStack borderBottomColor={"gray.200"} borderBottomWidth={1} py={5} space={2} w="100%" px={15} alignItems="center" justifyContent={"between"}>
+                                <HStack key={item.id} borderBottomColor={"gray.200"} borderBottomWidth={1} py={5} space={2} w="100%" px={15} alignItems="center" justifyContent={"between"}>
                                     <Avatar backgroundColor={"gray.200"}>
                                         <MaterialIcons size={25} name="person" />
                                     </Avatar>
@@ -57,4 +77,18 @@ export default function AccountsList(){
             </ScrollView>
         </Center>
     </View>
+    <AlertDialog isOpen={showLogout} onClose={() => setShowLogout(false)}  leastDestructiveRef={alertRef}>
+
+    <AlertDialog.Content >
+        <AlertDialog.Header>Are you sure ?</AlertDialog.Header>
+        <AlertDialog.Body>You will be logged out of your current session, click continue to proceed.</AlertDialog.Body>
+        <AlertDialog.Footer>
+            <HStack space={1}>
+                <Button backgroundColor={"white"} onPress={() => setShowLogout(false)}><Text color={"black"}>CANCEL</Text></Button>
+                <Button isLoading={isLoading} backgroundColor={"red.400"} onPress={onLogout}>CONTINUE</Button>
+            </HStack>
+        </AlertDialog.Footer>
+    </AlertDialog.Content>
+    </AlertDialog>
+    </>
 }

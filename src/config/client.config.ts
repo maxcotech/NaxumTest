@@ -1,10 +1,10 @@
 import axios, { AxiosError } from "axios";
 import { HttpDataResponse } from "./data_types/general.types";
+import { API_BASE_URL } from "@env";
 
 //TODO: move to env
-export const baseUrl = "http://localhost:8000/api/v1/";
 
-const client = axios.create({baseURL:baseUrl});
+const client = axios.create({baseURL: API_BASE_URL});
 client.interceptors.request.use(async (configs: any) => {
     if(typeof configs !== 'undefined' && configs.headers){
         configs.headers.accept = "application/json";
